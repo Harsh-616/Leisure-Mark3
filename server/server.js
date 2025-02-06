@@ -123,17 +123,8 @@ app.get("/get-data", authenticateToken, async (req, res) => {
   }
 });
 
-// Serve static HTML files
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/login.html"));
-});
-
-app.get("/index.html", authenticateToken, (req, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
-});
-
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/login.html`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
