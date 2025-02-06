@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+        <br />
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+        <br />
+        <!-- Hidden input field to store the device identifier -->
+        <input type="hidden" id="deviceIdentifier" name="deviceIdentifier" />
+        <br />
+        <button type="submit">Login</button>
+      </form>
+      <p id="error-message" style="color: red; display: none"></p>
+    </div>
+
+    <script>
+      // Function to generate and fetch the device identifier
+      function getDeviceIdentifier() {
+        // Get browser info (User-Agent)
+        const userAgent = navigator.userAgent;
+        // Get screen resolution
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+        // Get the number of CPU cores
+        const cpuCores = navigator.hardwareConcurrency;
+
+        // Create a unique device identifier by concatenating the details
+        const deviceIdentifier = `${userAgent}-${screenWidth}x${screenHeight}-${cpuCores}`;
+
+        // Set the device identifier in the hidden input field
+        document.getElementById("deviceIdentifier").value = deviceIdentifier;
+      }
+
+      // Call the function when the page loads
+      window.onload = getDeviceIdentifier;
+
+      // Handle form submission
+      const loginForm = document.getElementById("loginForm");
+      const errorMessage = document.getElementById("error-message");
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Prevent the default form submission
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const deviceIdentifier =
+          document.getElementById("deviceIdentifier").value;
+
+        try {
+          const response = await fetch("/authenticate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password, deviceIdentifier }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.token) {
+            // Store the token in localStorage
+            localStorage.setItem("token", data.token);
+
+            // Redirect to index.html
+            window.location.href = "/index.html";
+          } else {
+            // Display error message
+            errorMessage.textContent =
+              "Invalid credentials or device identifier.";
+            errorMessage.style.display = "block";
+          }
+        } catch (err) {
+          console.error("Login error:", err);
+          errorMessage.textContent = "An error occurred. Please try again.";
+          errorMessage.style.display = "block";
+        }
+      });
+    </script>
+  </body>
+</html>
